@@ -11,6 +11,7 @@ from tensorflow.python.framework import function
 from tqdm import tqdm
 from functools import partial
 import jieba
+import pickle
 
 # def encode_dataset(*splits, encoder):
 #     encoded_splits = []
@@ -22,6 +23,10 @@ import jieba
 #             fields.append(field)
 #         encoded_splits.append(fields)
 #     return encoded_splits
+
+def load_pickle_dataset(data_path)
+    with open(data_path, "rb") as f:
+        return pickle.load(f)[:100]
 
 def encode_dataset_lm(data_path, tokenizer, is_train=True):
     with open(data_path, 'r') as fp:

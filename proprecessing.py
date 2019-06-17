@@ -3,16 +3,20 @@ import tokenization
 import pickle
 from tqdm import tqdm
 import os
+import pdb
 
 def encoder_to_file(text_file, tokenizer, save_file):
-    with oepn(text_file, "rb") as f:
+    with open(text_file, "rb") as f:
         test_file = pickle.load(f)
         context_ids = []
         for data in tqdm(test_file):
             ids = []
-            for d in data:
-                ids.extend(tokenizer.convert_text_to_ids(d))
-            context_ids.append(ids)
+            try:
+                for d in data:
+                    ids.extend(tokenizer.convert_text_to_ids(d))
+                context_ids.append(ids)
+            except Exception as e:
+                print(data)
     with open(save_file, "wb") as f:
         pickle.dump(context_ids, f)
     return len(context_ids)
@@ -26,7 +30,7 @@ if __name__ == '__main__':
     parser.add_argument('--vocab_file', type=str, default=None, required=True)
     args = parser.parse_args()
 
-    tokenizer = tokenization.JiebaTokenizer(vocab_file=vocab_file)
+    tokenizer = tokenization.JiebaTokenizer(vocab_file=args.vocab_file)
     save_train_file = os.path.join(args.save_dir, "train-ids.pk")
     lens_ids = encoder_to_file(args.train_data, tokenizer, save_train_file)
     print('|| data {} :: write data into :: {}'.format(lens_ids, save_train_file))

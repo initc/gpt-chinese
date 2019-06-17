@@ -15,6 +15,7 @@ from sklearn.utils import shuffle
 from opt import adam, warmup_cosine, warmup_linear, warmup_constant
 from text_utils import TextEncoder
 from utils import encode_dataset_lm, flatten, iter_data_lm, find_trainable_variables, convert_gradient_to_tensor, shape_list, ResultLogger, assign_to_gpu, average_grads, make_path
+from utils import load_pickle_dataset
 
 import tokenization
 from tokenization import load_idx_to_token
@@ -221,7 +222,7 @@ def model(X, M, hparams, train=False, reuse=False):
         # h = tf.nn.embedding_lookup(wte, X) + tf.nn.embedding_lookup(wpe, positions_for(X))
         # wpe = dropout(wpe, embd_pdrop, train)
         # wte = dropout(wte, embd_pdrop, train)
-        
+
         h = embed(X, wte, depth=n_vocab) + embed(positions_for(X), wpe, depth=n_ctx)
         h = dropout(h, embd_pdrop, train)
         # pX = positions_for(X)
@@ -398,20 +399,23 @@ if __name__ == '__main__':
     n_vocab = len(tokenizer.vocab)
     idx_to_vocab = load_idx_to_token(vocab_file)
     
-    train_dataset = encode_dataset_lm(train_data_path, tokenizer)
+    # train_dataset = encode_dataset_lm(train_data_path, tokenizer)
+    train_dataset = load_pickle_dataset(train_data_path)
     print('------------\ntrain_data is\n', train_dataset[:3])
     max_len = 256
     n_ctx = min(max([len(sent[:max_len]) for sent in train_dataset])+2, n_ctx)
-    train_dataset = [['[CLS]'] + sent[:max_len] + ['[SEP]'] for sent in train_dataset]
-    train_data = [tokenizer.convert_tokens_to_ids(sent) for sent in train_dataset]
+    train_data = [[tokenizer.cls()] + sent[:max_len] + [tokenizer.eos()] for sent in train_dataset]
+    # train_data = [tokenizer.convert_tokens_to_ids(sent) for sent in train_dataset]
     random.shuffle(train_data)
 
     print('----------\nn_ctx is {}\nn_vocab is {}\n----------'.format(n_ctx, n_vocab))
     
-    valid_dataset = encode_dataset_lm(valid_data_path, tokenizer, is_train=False)
-    valid_dataset = [['[CLS]'] + sent[:max_len] + ['[SEP]'] for sent in valid_dataset]
-    valid_data = [tokenizer.convert_tokens_to_ids(sent) for sent in valid_dataset]
-    
+    # valid_dataset = encode_dataset_lm(valid_data_path, tokenizer, is_train=False)
+
+    valid_dataset = load_pickle_dataset(valid_data_path)
+    valid_data = [[tokenizer.cls()] + sent[:max_len] + [tokenizer.eos()] for sent in valid_dataset]
+    # valid_data = [tokenizer.convert_tokens_to_ids(sent) for sent in valid_dataset]
+
     n_train = len(train_data)
     n_valid = len(valid_data)
     n_batch_train = n_batch*n_gpu

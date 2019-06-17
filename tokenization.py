@@ -122,7 +122,7 @@ def load_vocab(vocab_file):
   """Loads a vocabulary file into a dictionary."""
   vocab = collections.OrderedDict()
   index = 0
-  with tf.gfile.GFile(vocab_file, "r") as reader:
+  with tf.io.gfile.GFile(vocab_file, "r") as reader:
     while True:
       token = convert_to_unicode(reader.readline())
       if not token:
@@ -199,6 +199,12 @@ class JiebaTokenizer(object):
 
   def convert_text_to_ids(self, text):
     return self.convert_tokens_to_ids(self.tokenize(text))
+
+  def cls(self):
+    return self.vocab["[CLS]"]
+
+  def eos(self):
+    return self.vocab["[EOS]"]
 
 
 class FullTokenizer(object):
