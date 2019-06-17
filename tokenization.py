@@ -197,6 +197,9 @@ class JiebaTokenizer(object):
   def convert_ids_to_tokens(self, ids):
     return convert_by_vocab(self.inv_vocab, ids)
 
+  def convert_text_to_ids(self, text):
+    return self.convert_tokens_to_ids(self.tokenize(text))
+
 
 class FullTokenizer(object):
   """Runs end-to-end tokenziation."""
